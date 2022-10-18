@@ -1,0 +1,473 @@
+---
+title: "Cyclistic Trips Data Analysis"
+author: "Bernice Akinwande"
+date: "2022-10-14"
+output: html_document
+---
+# Cyclisytic Trips Data
+
+## Cyclistic Bike-Share: Case Study
+
+# Introduction
+
+Cyclistic is a bike-share program that features more than 5,800 bicycles and 600 docking stations, launched in 2016. The bikes can be unlocked from one station and returned to any other station in the system anytime. Cyclistic offer reclining bikes, hand tricycles, and cargo bikes, to make bike-share more inclusive to people with disabilities and riders who can’t use a standard two-wheeled bike. Its pricing plans: single-ride passes, full-day passes, and annual memberships purchase. Customers who purchase single-ride or full-day passes are referred to as casual riders. Customers who purchase annual memberships are Cyclistic members. Annual members are much more profitable than casual riders. 
+
+# Business Task
+
+Cyclistic bike-share company wants to explore how different customers uses cyclistic bikes, get insights from their previous data and make recommendations to build strategies that would convert casual riders to casual members.
+
+This analysis will cover the 6 data analyst phases; ask (asking relevant questions), prepare (collect, organize and store data), process (eliminate inaccuracies that can get in the way of the results), analyzing (using R as a tool to transform and organize the information so I can draw useful conclusions, act (put insights to work)
+
+## Ask (asking relevant questions)
+
+1.	Identify the business task: To identify and build on the best marketing strategy to maximize the number of annual members or convert casual members to annual members.
+2.	Consider key stakeholders: Cyclistic Director of Marketing and manager (Lily Moreno), Marketing Analytics team, Executive team.
+3.	A clear statement of business task: find strategies with previous cyclistic bike-share data to maximize annual membership
+
+## What is the problem?
+
+•	How do casual riders and annual members use cyclistic bikes differently?
+•	How can casual riders be influenced to become members?
+•	How can I use previous cyclistic bike-share data to find strategies and identify trends, derive insights and make recommendations that will maximize annual membership?
+
+## Prepare (collect, organize and store data)
+
+The dataset to be used in this analysis is a public data from a bike sharing company. I downloaded the previous 12 months of cyclistic data and stored it on my local device. All the trip data is in a comma-delimited (.csv) file, with a total of 13 columns. For this analysis I will use 12 months of the latest data available: from April 2020 to March 2021.
+
+
+## STEP 1: Install and load packages.
+
+```{r}
+library(tidyverse)
+library(readr)
+library(ggplot2)
+library(lubridate)
+```
+
+## STEP 2: Import data into R and read from .csv files with the read_csv() function, then check and wrangle data.
+
+```{r}
+df_apr20 <- read.csv("202004-divvy-tripdata.csv")
+df_may20 <- read.csv("202005-divvy-tripdata.csv")
+df_jun20 <- read.csv("202006-divvy-tripdata.csv")
+df_jul20 <- read.csv("202007-divvy-tripdata.csv")
+df_aug20 <- read.csv("202008-divvy-tripdata.csv")
+df_sep20 <- read.csv("202009-divvy-tripdata.csv")
+df_oct20 <- read.csv("202010-divvy-tripdata.csv")
+df_nov20 <- read.csv("202011-divvy-tripdata.csv")
+df_dec20 <- read.csv("202012-divvy-tripdata.csv")
+df_jan21 <- read.csv("202101-divvy-tripdata.csv")
+df_feb21 <- read.csv("202102-divvy-tripdata.csv")
+df_mar21 <- read.csv("202103-divvy-tripdata.csv")
+```
+
+## Check for columns consistency in the different data frames of each month.
+
+```{r}
+colnames(df_apr20)
+colnames(df_may20)
+colnames(df_jun20)
+colnames(df_jul20)
+colnames(df_aug20)
+colnames(df_sep20) 
+colnames(df_oct20)
+colnames(df_nov20)
+colnames(df_dec20)
+colnames(df_jan21)
+colnames(df_feb21)
+colnames(df_mar21)
+```
+
+## Check for data structure.
+
+```{r}
+str(df_apr20)
+str(df_may20)
+str(df_jun20)
+str(df_jul20)
+str(df_aug20)
+str(df_sep20) 
+str(df_oct20)
+str(df_nov20)
+str(df_dec20)
+str(df_jan21)
+str(df_feb21)
+str(df_mar21)
+```
+
+## Wrangle data; filter out the columns  not useful in this analysis: start_station_name, start_station_id, end_station_name, end_station_id.
+
+```{r}
+df_apr20 <- df_apr20 %>% select(-c(start_station_name, start_station_id,
+                                   end_station_name, end_station_id))
+df_may20 <- df_may20 %>% select(-c(start_station_name, start_station_id,
+                                   end_station_name, end_station_id))
+df_jun20 <- df_jun20 %>% select(-c(start_station_name, start_station_id,
+                                   end_station_name, end_station_id))
+df_jul20 <- df_jul20 %>% select(-c(start_station_name, start_station_id,
+                                   end_station_name, end_station_id))
+df_aug20 <- df_aug20 %>% select(-c(start_station_name, start_station_id,
+                                   end_station_name, end_station_id))
+df_sep20 <- df_sep20 %>% select(-c(start_station_name, start_station_id,
+                                   end_station_name, end_station_id))
+df_oct20 <- df_oct20 %>% select(-c(start_station_name, start_station_id,
+                                   end_station_name, end_station_id))
+df_nov20 <- df_nov20 %>% select(-c(start_station_name, start_station_id,
+                                   end_station_name, end_station_id))
+df_dec20 <- df_dec20 %>% select(-c(start_station_name, start_station_id,
+                                   end_station_name, end_station_id))
+df_jan21 <- df_jan21 %>% select(-c(start_station_name, start_station_id,
+                                   end_station_name, end_station_id))
+df_feb21 <- df_feb21 %>% select(-c(start_station_name, start_station_id,
+                                   end_station_name, end_station_id,))
+df_mar21 <- df_mar21 %>% select(-c(start_station_name, start_station_id,
+                                   end_station_name, end_station_id))
+```
+
+
+## Merge data into a single data frame.
+
+```{r}
+df_trips <- bind_rows(df_apr20, df_may20, df_jun20, df_jul20, 
+                      df_aug20, df_sep20, df_oct20, df_nov20,
+                      df_dec20, df_jan21, df_feb21, df_mar21)
+```
+
+### Check a few rows of what the merged data frame looks like.
+
+```{r}
+head(df_trips)
+colnames(df_trips)
+str(df_trips)
+summary(df_trips)
+```
+
+## To ensure proper number of observations in the categorical data.
+
+```{r}
+table(df_trips$member_casual)
+table(df_trips$rideable_type)
+```
+
+## STEP 3: Data clean up and add data to prepare for analysis. Check for quality by Divvy where ride_length was negative or 'zero' and drop NA values.
+
+```{r}
+df_trips_clean <- drop_na(df_trips)
+df_trips_cleaned <- df_trips_clean[!(df_trips_clean$ride_length <= 0),]
+```
+
+## Create new columns that separates the date and time into a new data frame for start time, a started_at, and an ended_at column.
+
+```{r}
+df_trips_1 <- df_trips_cleaned %>%
+  separate(started_at, into = c("started_date", "started_time"), sep=" ", extra = "merge")
+
+df_trips_1$started_at <- paste(df_trips_1$started_date, 
+                               df_trips_1$started_time, sep = " ")
+
+df_trips_2 <- df_trips_1 %>%
+  separate(ended_at, into = c("ended_date", "ended_time"), sep=" ", 
+           extra = "merge")
+
+df_trips_2$ended_at <- paste(df_trips_2$ended_date, 
+                               df_trips_2$ended_time, sep = " ")
+```
+
+## Convert start date column to a date format and read it into a new data frame.
+
+```{r}
+
+df_trips_2 <- df_trips_2 %>% 
+  mutate(started_date = as.Date(started_date, "%d/%m/%Y"))%>%
+  mutate(ended_date = as.Date(ended_date, "%d/%m/%Y"))%>%
+  mutate(year = format(as.Date(started_date), "%Y")) %>% # extract year
+  mutate(month = format(as.Date(started_date), "%B")) %>% #extract month
+  mutate(day_of_week = format(as.Date(started_date), "%A"))# extract day of week
+```
+
+## Create ride length column in seconds.
+
+```{r}
+df_trips_3 <- df_trips_2 %>%
+  mutate(ride_length = hms(ride_length),
+         ride_length_seconds = hour(ride_length) *3600
+         + minute(ride_length)*60 + second(ride_length))
+```
+
+## STEP 4: Conduct a descriptive analysis, fix the order of days of the week and run the average ride time by each day for riders.
+
+```{r}
+summary(df_trips_3$ride_length_seconds)
+
+
+df_trips_3 %>% 
+  summarise(average_ride_length = mean(ride_length_seconds), median_length = median(ride_length_seconds), 
+            max_ride_length = max(ride_length_seconds), min_ride_length = min(ride_length_seconds))
+
+df_trips_3$day_of_week <- ordered(df_trips_3$day_of_week, 
+                                    levels=c("Sunday", "Monday", "Tuesday", 
+                                             "Wednesday", "Thursday", "Friday",
+                                             "Saturday"))
+
+
+aggregate(df_trips_3$ride_length_seconds ~ df_trips_3$member_casual + 
+            df_trips_3$day_of_week, FUN = mean)
+```
+
+## Visualization.
+
+### Visualize the number of rides by rider type.
+
+```{r}
+df_trips_3 %>% 
+  mutate(weekday = wday(started_at, label = TRUE)) %>% 
+  group_by(member_casual, weekday) %>% 
+  summarise(number_of_rides = n()
+            ,average_duration = mean(ride_length_seconds)) %>% 
+  arrange(member_casual, weekday)  %>% 
+  ggplot(aes(x = weekday, y = number_of_rides, fill = member_casual)) +
+  scale_fill_manual(values = c("casual" = "#669933", "member" = "#CCCC00"))+
+  geom_col(position = "dodge") +
+  labs(x="Weekday", y="Number Of Rides", 
+       title= "Riders distribution Per Weekday")
+```
+
+### The chart above shows that both riders take a stead trip throughout the week. Member riders take about two-third trips of the rides than casual riders with most rides taken on Sundays and Mondays. Casual riders take the least rides on Saturday, and members on Wednesday.
+  
+  
+## Let's create a visualization for average duration.
+
+```{r}
+  df_trips_3 %>% 
+    mutate(weekday = wday(started_at, label = TRUE)) %>% 
+    group_by(member_casual, weekday) %>% 
+    summarise(number_of_rides = n()
+              ,average_duration = mean(ride_length_seconds)) %>% 
+    arrange(member_casual, weekday)  %>% 
+    ggplot(aes(x = weekday, y = average_duration, fill = member_casual)) +
+    scale_fill_manual(values = c("casual" = "#669933", "member" = "#CCCC00"))+
+    geom_col(position = "dodge") +
+    labs(x="Weekday", y="Average Duration", title= "Average Duration of Ride Per Weekday")
+```
+
+### The average duration that member riders take to ride per week seem to be half the average duration of casual riders, The chart shows Mondays and Tuesdays have the highest average duration for members and casual riders.
+ 
+ 
+## Members vs casual riders by their total rides taken.
+
+```{r}
+  df_trips_3 %>% 
+    group_by(member_casual) %>% 
+    summarise(ride_count = length(ride_id), 
+              ride_percentage = (length(ride_id) / nrow(df_trips_3)) * 100)
+  
+  ggplot(df_trips_3, aes(x = member_casual, fill=member_casual)) +
+    geom_bar() +
+    scale_fill_manual(values = c("casual" = "#669933", "member" = "#CCCC00"))+
+    labs(x="Casuals vs Members", y="Number Of Rides", 
+         title= "Total Rides by Member and Casual Riders")
+  
+```
+
+### The distribution chart on casual versus member riders show member riders take many rides which amounts to member riders taking about 55% of the dataset and casual members taking about 45% of the dataset.
+ 
+ 
+## Fix the order of the month, and visualize the total rides of members and casual riders per month.
+
+```{r}
+ df_trips_3$month <- ordered(df_trips_3$month, 
+                                  levels=c( "April", "May", "June", "July", 
+                                           "August", "September", "October", 
+                                           "November", "December", "January",
+                                           "February", "March"))
+ 
+
+  df_trips_3%>%  
+    group_by(member_casual, month) %>% 
+    summarise(number_of_rides = n(),.groups="drop") %>% 
+    arrange(member_casual, month) %>%
+    ggplot(aes(x = month, y = number_of_rides, fill = member_casual)) +
+    scale_fill_manual(values = c("casual" = "#669933", "member" = "#CCCC00"))+
+    labs(title ="Total rides Per Month by Member and Casual riders", 
+         x = "Month", y= "Number Of Rides")+
+    theme(axis.text.x = element_text(angle = 45)) +
+    geom_col(width=0.5, position = position_dodge(width=0.5)) +
+    scale_y_continuous(labels = function(x) format(x, scientific = FALSE))
+```  
+
+### The chart shows the total rides per month by both customers. As seen, July, August and September seem to be the most engaging time of the year for both group of riders. This might signify that rides get to their peak in autumn and falls drastically in summer. However, member rides are higher than casual riders all through the months.
+
+
+## Total rides per ride-able types by member and casual riders.
+
+```{r}
+  df_trips_3%>%  
+    group_by(member_casual, rideable_type) %>% 
+    summarise(number_of_rides = n(),.groups="drop") %>% 
+    arrange(member_casual, rideable_type) %>%
+    ggplot(aes(x = rideable_type, y = number_of_rides, fill = member_casual)) +
+    scale_fill_manual(values = c("casual" = "#669933", "member" = "#CCCC00"))+
+    labs(title ="Total Rides Per Bike Types by Casual and Member riders", 
+         x = "Bike Types", y= "Number Of Rides")+
+    theme(axis.text.x = element_text(angle = 45)) +
+    geom_col(width=0.5, position = position_dodge(width=0.5)) +
+    scale_y_continuous(labels = function(x) format(x, scientific = FALSE))
+```
+
+### The number of rides taken by both riders based on the type of bikes reflects that docked bikes was mostly used throughout the year and this could be because docked bikes have security features, and this made it preferable. The chart also shows that electric bikes were mostly used by riders than the classic bike type, this could mean that people would rather use electric bikes because it’s probably less stressful and consumes less gas.
+
+
+## Bike types used by riders based on the time of the year.
+
+```{r}
+  df_trips_3%>%  
+    group_by(rideable_type, month) %>% 
+    summarise(number_of_rides = n(),.groups="drop") %>% 
+    arrange(rideable_type, month) %>%
+    ggplot(aes(x = month, y = number_of_rides, fill = rideable_type)) +
+    scale_fill_manual(values = c("classic_bike" = "#669933", "electric_bike" = "#CCCC00", "docked_bike" = "#336699"))+
+    labs(title ="Bike Types Used Per Month by Member and Casual riders", 
+         x = "Month", y= "Number Of Rides")+
+    theme(axis.text.x = element_text(angle = 45)) +
+    geom_col(width=0.5, position = position_dodge(width=0.5)) +
+    scale_y_continuous(labels = function(x) format(x, scientific = FALSE))
+``` 
+
+### This chart shows how bikes were used during the seasons of the year. Docked bikes were mostly used in the summer and barely used in the winter.  In autumn, more electric bikes were used, while classic bikes were mostly used in the winter.
+
+
+# Findings and Recommendations
+
+1.	On a average, members take more rides than casual riders, they have the biggest portion of the total rides; so, to compel casual riders to opt in for membership subscription, discounts could be given out to casual riders that’d like to switch to become members, followed by a flexible payment plan
+
+2.	Riders tend to use more docked bikes; hence, funds should be directed to acquiring more docked bikes and maybe implementing the catchy features on docked bikes to the others so that riders can have alternatives if docked bikes run out of rentage.
+
+3.	Marketing strategies like campaigns can be done via advertisement to state the benefits of membership, this will compel riders to opt into the membership subscription.
+
+
+
+# Study Limitation 
+More variables like gender, income, house location, family status etc., would have explained more to determine the growth and help to build more insights on the cyclistic bike share company to maximize profit.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
